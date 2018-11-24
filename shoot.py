@@ -3,16 +3,17 @@ import os
 import time
 from subprocess import Popen, PIPE
 import re
+import config
 
 class Shoot:
-    
+
     camera_detected = False
-    
+
     picture_count = 0
-    
+
     def __init__(self):
         self.date = datetime.now().strftime("%y_%m_%d_%H_%M")
-        self.folder_name = '/home/pi/Desktop/shoots/'+self.date
+        self.folder_name = config.DATA['shoots_folder']+self.date
         self.makefolder()
         self.logfile = open(self.folder_name+'/log.txt', 'a+')
         self.logfile.write('Created at : '+self.date+'\n')
@@ -20,13 +21,14 @@ class Shoot:
     def makefolder(self):
         if not os.path.exists('/home/pi/Desktop/shoots/'+self.date):
             os.makedirs(self.folder_name)
-            
+
     def scan_for_camera(self):
-        while not self.camera_detected:            
+        while not self.camera_detected:
             self.logfile.write('\tscanning for camera...\n')
             p = Popen(['gphoto2', '--auto-detect'], stdin=PIPE, stdout=PIPE, stderr=PIPE)
             output, err = p.communicate(b"input data that is passed to subprocess' stdin")
             rc = p.returncode
+            camera_id_string = config.DATA['cam_id_str']
             if(len(re.findall("Sony", output))>0):
                 self.camera_detected = True
                 self.logfile.write('\tcamera detected.\n')
@@ -35,7 +37,7 @@ class Shoot:
                 self.logfile.write('\tcamera not detected.\n')
                 print('camera not found')
                 time.sleep(5)
-    
+
     def start_shoot(self):
         self.logfile.write('\n\tStarting shoot: ---------------\n\n')
         if self.camera_detected:
@@ -52,9 +54,6 @@ class Shoot:
                     self.picture_count += 1
         else:
             print('\tNo Device was detected.')
-            
+
     def output(self,msg):
         print(msg)
-    
-
-
