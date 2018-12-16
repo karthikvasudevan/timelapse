@@ -1,2 +1,3 @@
 *.pyc
 shoots/*
+config_local.py
