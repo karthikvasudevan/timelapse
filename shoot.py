@@ -16,6 +16,7 @@ class Shoot:
 
     def scan_for_camera(self):
         while not self.camera_detected:
+            self.scan_count += 1
             self.logfile.write('\tscanning for camera...\n')
             p = Popen(['gphoto2', '--auto-detect'], stdin=PIPE, stdout=PIPE, stderr=PIPE)
             output, err = p.communicate(b"input data that is passed to subprocess' stdin")
