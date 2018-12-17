@@ -1,26 +1,18 @@
-from datetime import datetime, timedelta
 import os
 import time
 from subprocess import Popen, PIPE
 import re
-import config
+from config import Config
 
 class Shoot:
-
     camera_detected = False
-
     picture_count = 0
-
+    config = Config()
     def __init__(self):
-        self.date = datetime.now().strftime("%y_%m_%d_%H_%M")
-        self.folder_name = config.DATA['shoots_folder']+self.date
-        self.makefolder()
+        self.folder_name = self.config.current_folder_path
         self.logfile = open(self.folder_name+'/log.txt', 'a+')
-        self.logfile.write('Created at : '+self.date+'\n')
-
-    def makefolder(self):
-        if not os.path.exists('/home/pi/Desktop/shoots/'+self.date):
-            os.makedirs(self.folder_name)
+        self.logfile.write('Created at : '+self.config.timestamp+'\n')
+        self.logfile.write('Current working folder : '+str(self.config)+'\n')
 
     def scan_for_camera(self):
         while not self.camera_detected:
@@ -28,10 +20,11 @@ class Shoot:
             p = Popen(['gphoto2', '--auto-detect'], stdin=PIPE, stdout=PIPE, stderr=PIPE)
             output, err = p.communicate(b"input data that is passed to subprocess' stdin")
             rc = p.returncode
-            camera_id_string = config.DATA['cam_id_str']
-            if(len(re.findall("Sony", output))>0):
+            camera_id_string = self.config.cam_id
+            if(len(re.findall(camera_id_string, output))>0):
                 self.camera_detected = True
-                self.logfile.write('\tcamera detected.\n')
+                self.logfile.write('\tcamera detected. Identified camera by string id '+self.config.cam_id+'\n')
+                self.logfile.write(output)
                 print('camera detected')
             else:
                 self.logfile.write('\tcamera not detected.\n')
@@ -41,9 +34,9 @@ class Shoot:
     def start_shoot(self):
         self.logfile.write('\n\tStarting shoot: ---------------\n\n')
         if self.camera_detected:
-            while self.picture_count < 500:
+            while self.picture_count < self.config.picture_count_limit:
                 self.logfile.write('capturing image - '+str(self.picture_count)+'\n')
-                file_name = '/home/pi/Desktop/shoots/'+self.date+'/'+str(self.picture_count)+'_'+datetime.now().strftime("%H_%M")+'.jpg'
+                file_name = self.config.current_folder_path+str(self.picture_count).zfill(4)+'.jpg'
                 c = Popen(['gphoto2', '--capture-image-and-download', '--filename', file_name], stdin=PIPE, stdout=PIPE, stderr=PIPE)
                 output, err = c.communicate()
                 if err:
