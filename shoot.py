@@ -22,7 +22,9 @@ class Shoot:
             output, err = p.communicate(b"input data that is passed to subprocess' stdin")
             rc = p.returncode
             camera_id_string = self.config.cam_id
-            if(len(re.findall(camera_id_string, output))>0):
+            print(camera_id_string)
+            print(output.decode("utf-8"))
+            if(len(re.findall(camera_id_string, output.decode("utf-8")))>0):
                 self.camera_detected = True
                 self.logfile.write('\tcamera detected. Identified camera by string id '+self.config.cam_id+'\n')
                 self.logfile.write(output)
