@@ -4,4 +4,4 @@ shoot = Shoot()
 
 shoot.scan_for_camera()
 
-#shoot.start_shoot()
+shoot.start_shoot()

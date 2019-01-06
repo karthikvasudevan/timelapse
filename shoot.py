@@ -16,7 +16,7 @@ class Shoot:
 
     def scan_for_camera(self):
         while not self.camera_detected:
-            self.scan_count += 1
+            self.config.scan_count += 1
             self.logfile.write('\tscanning for camera...\n')
             p = Popen(['gphoto2', '--auto-detect'], stdin=PIPE, stdout=PIPE, stderr=PIPE)
             output, err = p.communicate(b"input data that is passed to subprocess' stdin")
@@ -38,6 +38,7 @@ class Shoot:
             while self.picture_count < self.config.picture_count_limit:
                 self.logfile.write('capturing image - '+str(self.picture_count)+'\n')
                 file_name = self.config.current_folder_path+str(self.picture_count).zfill(4)+'.jpg'
+                print(file_name)
                 c = Popen(['gphoto2', '--capture-image-and-download', '--filename', file_name], stdin=PIPE, stdout=PIPE, stderr=PIPE)
                 output, err = c.communicate()
                 if err:
